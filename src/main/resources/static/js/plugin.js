@@ -168,6 +168,39 @@ const plugin_local = new Vue({
             console.log(plugin)
             window.open("/proactive/config/" + plugin.clazz + "/set.html")
         },
+        managementAuthorization : function(plugin){
+            $.get("pluginServlet/getVerification", function (data) {
+                const json = $.parseJSON(data)
+                let body = ""
+                for (let i = 0; i < json.verifications.length; i++) {
+                    if (json.verifications[i].clazz === plugin.clazz){
+                        body += '<tr>' +
+                            '<td>' + json.verifications[i].fromQQ +'</td>' +
+                            '<td>' + json.verifications[i].formatStart +'</td>' +
+                            '<td>' + json.verifications[i].formatEnd +'</td>' +
+                            '<td><button class="layui-btn layui-btn-normal">续费</button></td>' +
+                            '</tr>'
+                    }
+                }
+                let html = '<table  class="layui-table" lay-even="" lay-skin="nob" >' +
+                    '<thead>' +
+                    '<tr><th>授权对象</th><th>授权时间</th><th>到期时间</th><th>操作</th></tr>' +
+                    '</thead>' +
+                    '<tbody>' + body + '</tbody>' +
+                    '</table>'
+                layui.layer.open({
+                    type: 1 //Page层类型
+                    ,area: ['500px', '300px']
+                    ,title: '授权管理'
+                    ,shade: 0.6 //遮罩透明度
+                    ,anim: 0 //0-6的动画形式，-1不开启
+                    ,content: html
+                });
+            })
+
+
+
+        },
         swapWeight : function(plugin, behavior){
             $.post("pluginServlet/adjustPriority", {
                 clazz : plugin.clazz,

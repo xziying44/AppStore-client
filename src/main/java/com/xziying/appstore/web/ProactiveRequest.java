@@ -179,6 +179,15 @@ public class ProactiveRequest {
         pluginPool.eventHandling(eventInfo);
     }
 
+    @ResponseBody
+    @RequestMapping("/eventJson")
+    public void eventJson(
+            String json
+    ){
+        EventInfo eventInfo = new EventInfo(json);
+        pluginPool.eventHandling(eventInfo);
+    }
+
 /*    @ResponseBody
     @RequestMapping("/start")
     public String test2() throws Exception {

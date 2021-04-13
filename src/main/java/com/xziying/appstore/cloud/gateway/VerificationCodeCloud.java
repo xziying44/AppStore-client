@@ -4,6 +4,7 @@ import com.xziying.appstore.api.DatabaseService;
 import com.xziying.appstore.plugIn.ProtocolEntry;
 import com.xziying.appstore.plugIn.domain.EventInfo;
 
+
 /**
  * VerificationCodeCloud
  *
@@ -14,5 +15,7 @@ public interface VerificationCodeCloud {
 
     void initialize(DatabaseService databaseService, String token);
 
-    int processTheMessage(ProtocolEntry protocolEntry, EventInfo eventInfo);
+    int processTheMessage(String clazz, ProtocolEntry protocolEntry, EventInfo eventInfo);
+
+    String getVerification();
 }

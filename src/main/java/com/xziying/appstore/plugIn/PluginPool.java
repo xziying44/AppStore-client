@@ -324,6 +324,9 @@ public class PluginPool {
         return bb.array();
     }
 
+    public String getVerification(){
+        return this.verificationCodeCloud.getVerification();
+    }
 
     public void eventHandling(
             EventInfo eventInfo
@@ -334,7 +337,7 @@ public class PluginPool {
                     continue;
                 }
                 ProtocolEntry protocolEntry = protocolEntryInfo.getProtocolEntry();
-                int event = this.verificationCodeCloud.processTheMessage(protocolEntry, eventInfo);
+                int event = this.verificationCodeCloud.processTheMessage(protocolEntryInfo.getClazz(), protocolEntry, eventInfo);
                 if (event == 1){
                     break;
                 }

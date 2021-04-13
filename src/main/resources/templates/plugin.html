@@ -106,6 +106,7 @@
                             <th>作者</th>
                             <th>版本</th>
                             <th>状态</th>
+                            <th>授权</th>
                             <th>操作</th>
                             <th>优先级</th>
                             <th>开关</th>
@@ -117,6 +118,11 @@
                             <td>{{plugin.protocolEntry.info.author}}</td>
                             <td>{{plugin.protocolEntry.info.version}}</td>
                             <td>已安装</td>
+                            <td>
+
+                                <button @click="managementAuthorization(plugin)" class="layui-btn layui-btn-normal layui-bg-cyan">管理授权</button>
+
+                            </td>
                             <td>
                                 <button @click="jumpSetting(plugin)" class="layui-btn layui-btn-normal">配置</button>
 

@@ -1,14 +1,15 @@
 package com.xziying.appstore.utils;
 
 import org.apache.tomcat.util.codec.binary.Base64;
+import org.junit.Test;
+import sun.misc.BASE64Decoder;
 
 import javax.crypto.Cipher;
+import javax.crypto.spec.SecretKeySpec;
 import java.io.ByteArrayOutputStream;
 import java.security.*;
 import java.security.interfaces.RSAPrivateKey;
-import java.security.interfaces.RSAPublicKey;
 import java.security.spec.PKCS8EncodedKeySpec;
-import java.security.spec.X509EncodedKeySpec;
 import java.util.Arrays;
 
 /**
@@ -45,4 +46,6 @@ public class RSAUtil {
         }
         return returnValue.toByteArray();
     }
+
+
 }

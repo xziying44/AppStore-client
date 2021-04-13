@@ -148,4 +148,10 @@ public class PluginServlet {
         return jsonObject.toString();
     }
 
+    @ResponseBody
+    @RequestMapping(value = "/getVerification", method = RequestMethod.GET)
+    public String getVerification(
+    ){
+        return pluginPool.getVerification();
+    }
 }
