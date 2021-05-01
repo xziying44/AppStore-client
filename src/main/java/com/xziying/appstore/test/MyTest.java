@@ -31,7 +31,6 @@ public class MyTest {
         File jarFile = new File(jarPath); // 从URLClassLoader类中获取类所在文件夹的方法，jar也可以认为是一个文件夹
 
         if (!jarFile.exists()) {
-            System.out.println("jar file not found.");
             return;
         }
 
@@ -69,9 +68,5 @@ public class MyTest {
 
     }
 
-    @Test
-    public void test2(){
-        System.out.println((int)'\n');
-        System.out.println((int)'\r');
-    }
+
 }

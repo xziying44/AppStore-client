@@ -6,7 +6,6 @@ import com.xziying.appstore.cloud.WebToken;
 import com.xziying.appstore.plugIn.PlugInDiscovery;
 import com.xziying.appstore.plugIn.PluginPool;
 import com.xziying.appstore.plugIn.ProtocolEntry;
-import com.xziying.appstore.plugIn.cloud.PluginConfigCloud;
 import com.xziying.appstore.plugIn.domain.PlugInInfo;
 import com.xziying.appstore.plugIn.pack.ProtocolEntryInfo;
 import com.xziying.appstore.utils.HttpDownloadUtil;
@@ -50,7 +49,6 @@ public class PluginServlet {
     @RequestMapping("/getList")
     public String getList(){
         try {
-            System.out.println(webToken.getToken());
             return databaseService.getPluginList(webToken.getToken());
         } catch (InterruptedException e) {
             e.printStackTrace();

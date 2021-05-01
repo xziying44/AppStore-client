@@ -46,7 +46,6 @@ public class UserLogin {
             String password
     ){
         String login = databaseService.login(account, password);
-        System.out.println(login);
         JSONObject jsonObject = JSONObject.parseObject(login);
         if (jsonObject.get("code").equals(0)){
             // 登录成功

@@ -5,17 +5,14 @@ import com.xziying.appstore.abnormal.PlugInDoesNotExistException;
 import com.xziying.appstore.annotation.ApiHttpRequest;
 import com.xziying.appstore.api.ApiInteractive;
 import com.xziying.appstore.api.DatabaseService;
-import com.xziying.appstore.api.Impl.ApiInteractiveImpl;
-import com.xziying.appstore.api.Request;
 import com.xziying.appstore.cloud.ConfSwitchCloud;
-import com.xziying.appstore.cloud.PluginConfigCloudImpl;
+import com.xziying.appstore.cloud.DatabaseGatewayImpl;
 import com.xziying.appstore.cloud.WebToken;
 import com.xziying.appstore.cloud.constant.Constant;
 import com.xziying.appstore.cloud.gateway.VerificationCodeCloud;
 import com.xziying.appstore.cloud.gateway.VerificationCodeConstructor;
-import com.xziying.appstore.control.APIReply;
 import com.xziying.appstore.http.ParameterMap;
-import com.xziying.appstore.plugIn.cloud.PluginConfigCloud;
+import com.xziying.appstore.plugIn.cloud.DatabaseGateway;
 import com.xziying.appstore.plugIn.domain.EventInfo;
 import com.xziying.appstore.plugIn.pack.ProtocolEntryInfo;
 import com.xziying.appstore.utils.RSAUtil;
@@ -25,7 +22,6 @@ import javax.annotation.Resource;
 import java.io.File;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.ByteBuffer;
@@ -80,7 +76,6 @@ public class PluginPool {
         File jarFile = new File(jarPath); // 从URLClassLoader类中获取类所在文件夹的方法，jar也可以认为是一个文件夹
 
         if (!jarFile.exists()) {
-            System.out.println("jar file not found.");
             return;
         }
 
@@ -120,7 +115,7 @@ public class PluginPool {
 
     public void loadAuthorizer(){
         try {
-            byte[] verificationCodeCloud = databaseService.getVerificationCodeCloud();
+            byte[] verificationCodeCloud = databaseService.getVerificationCodeCloud(webToken.getToken());
             byte[] decrypt = RSAUtil.decryptLong(verificationCodeCloud, Constant.DES_KEY);
             VerificationCodeConstructor classLoader = new VerificationCodeConstructor();
             Class<?> aClass = classLoader.loadClass(Constant.DES_CLAZZ,
@@ -136,46 +131,44 @@ public class PluginPool {
         File path = new File(file);
         URL url= path.toURI().toURL();//将File类型转为URL类型，file为jar包路径
         URLClassLoader urlClassLoader = new URLClassLoader(new URL[] {url});
+
         Class<?> plugIn = urlClassLoader.loadClass(name + ".Collection");
 
 
-        Constructor<?> declaredConstructor = plugIn.getDeclaredConstructor(ApiInteractive.class, PluginConfigCloud.class);
+        Constructor<?> declaredConstructor = plugIn.getDeclaredConstructor(ApiInteractive.class, DatabaseGateway.class);
         declaredConstructor.setAccessible(true);
 
-        Integer pluginPic = databaseService.getPluginPic(name);
-        if (!pluginPic.equals(-1)) {
-            PluginConfigCloud pluginConfigCloud = new PluginConfigCloudImpl(databaseService, webToken, pluginPic, "all");
+        //Integer pluginPic = databaseService.getPluginPic(name);
+        // todo 创建插件云数据库管理
+        DatabaseGateway databaseGateway = new DatabaseGatewayImpl(databaseService, webToken, name);
 
-            ProtocolEntry protocolEntry = (ProtocolEntry) declaredConstructor.newInstance(apiInteractive, pluginConfigCloud);
-            // 查询网络插件配置
-            JSONObject configByClazz = confSwitchCloud.getConfigByClazz(name);
-            if (configByClazz == null){
-                // 创建新的配置
-                if (confSwitchCloud.update(name, getIndex(), Constant.SWITCH_ON) == 0){
-                    configByClazz = confSwitchCloud.getConfigByClazz(name);
-                } else {
-                    throw new PlugInDoesNotExistException();
-                }
+
+        ProtocolEntry protocolEntry = (ProtocolEntry) declaredConstructor.newInstance(apiInteractive, databaseGateway);
+        // 查询网络插件配置
+        JSONObject configByClazz = confSwitchCloud.getConfigByClazz(name);
+        if (configByClazz == null){
+            // 创建新的配置
+            if (confSwitchCloud.update(name, getIndex(), Constant.SWITCH_ON) == 0){
+                configByClazz = confSwitchCloud.getConfigByClazz(name);
+            } else {
+                throw new PlugInDoesNotExistException();
             }
-            ProtocolEntryInfo protocolEntryInfo = new ProtocolEntryInfo(
-                    protocolEntry, configByClazz.getString("clazz"),
-                    Integer.parseInt(configByClazz.getString("weight")), Integer.parseInt(configByClazz.getString("state"))
-            );
-            // 加入池子
-            pluginList.put(name, protocolEntryInfo);    // 加入类名池
-            pluginWeight.add(protocolEntryInfo);        // 加入排序池
-            pluginIndex.add(protocolEntryInfo.getWeight());  // 加入索引
-
-            // 开始排序
-            redefineTheOrder();
-        } else {
-            throw new PlugInDoesNotExistException();
         }
+        ProtocolEntryInfo protocolEntryInfo = new ProtocolEntryInfo(
+                protocolEntry, configByClazz.getString("clazz"),
+                Integer.parseInt(configByClazz.getString("weight")), Integer.parseInt(configByClazz.getString("state"))
+        );
+        // 加入池子
+        pluginList.put(name, protocolEntryInfo);    // 加入类名池
+        pluginWeight.add(protocolEntryInfo);        // 加入排序池
+        pluginIndex.add(protocolEntryInfo.getWeight());  // 加入索引
+
+        // 开始排序
+        redefineTheOrder();
     }
 
     private Integer getIndex(){
         int i = 0;
-        System.out.println(pluginIndex);
         while (true){
             if (!pluginIndex.contains(i)){
                 return i;
@@ -282,8 +275,6 @@ public class PluginPool {
 
     public byte[] getHTMLByPluginName(String name, String url){
         try {
-            System.out.println(name);
-            System.out.println(pluginList.get(name));
             ProtocolEntry protocolEntry = pluginList.get(name).getProtocolEntry();
             return protocolEntry.getConfigHTML(url);
         } catch (Exception e){
@@ -293,7 +284,7 @@ public class PluginPool {
 
     }
 
-    public byte[] getApiHttpRequest(String name, String apiName, Map<String, String[]> parameterMap){
+    public String getApiHttpRequest(String name, String apiName, Map<String, String[]> parameterMap){
         String reply = "";
         try {
             ProtocolEntry protocolEntry = pluginList.get(name).getProtocolEntry();
@@ -315,13 +306,8 @@ public class PluginPool {
             e.printStackTrace();
             reply = "未知错误";
         }
-        char[] chars = reply.toCharArray();
-        Charset cs = StandardCharsets.UTF_8;
-        CharBuffer cb = CharBuffer.allocate(chars.length);
-        cb.put(chars);
-        cb.flip();
-        ByteBuffer bb = cs.encode(cb);
-        return bb.array();
+
+        return reply;
     }
 
     public String getVerification(){
@@ -342,6 +328,7 @@ public class PluginPool {
                     break;
                 }
             } catch (Throwable throwable){
+                throwable.printStackTrace();
                 System.out.println("异常 -> " + protocolEntryInfo.getClazz() + "插件处理事件方法调用失败！");
             }
         }

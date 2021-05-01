@@ -7,10 +7,7 @@ import com.xziying.appstore.plugIn.domain.EventInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
@@ -98,6 +95,19 @@ public class ProactiveRequest {
     }
 
     @ResponseBody
+    @RequestMapping("/config/{clazz}/api/{api}")
+    public String api(
+            HttpServletResponse response,
+            HttpServletRequest request,
+            @PathVariable String clazz,
+            @PathVariable String api
+    ) throws IOException {
+
+        Map<String, String[]> parameterMap = request.getParameterMap();
+        return pluginPool.getApiHttpRequest(clazz, api, parameterMap);
+    }
+
+    @ResponseBody
     @RequestMapping("/config/**")
     public byte[] html(
             HttpServletResponse response,
@@ -135,8 +145,7 @@ public class ProactiveRequest {
                     break;
                 }
                 case 4:{
-                    Map<String, String[]> parameterMap = request.getParameterMap();
-                    return pluginPool.getApiHttpRequest(appName, u, parameterMap);
+
                 }
             }
         }

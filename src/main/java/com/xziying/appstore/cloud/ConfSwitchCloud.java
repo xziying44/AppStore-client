@@ -36,7 +36,6 @@ public class ConfSwitchCloud {
             JSONObject jsonObject = JSONObject.parseObject(databaseService.querySwitch(token.getToken()));
             Object confSwitches = jsonObject.get("confSwitches");
             confSwitchNormals = (List<JSONObject>)confSwitches;
-            System.out.println(confSwitches);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

@@ -16,7 +16,8 @@ public class DatabaseServiceBean {
 
     @Bean
     DatabaseService databaseService(){
-        return (DatabaseService) ProxyPattern.getProxy(DatabaseService.class, "127.0.0.1", 7799);
-        //return (DatabaseService) ProxyPattern.getProxy(DatabaseService.class, "app.xrxrxr.com", 7799);
+
+        //return (DatabaseService) ProxyPattern.getProxy(DatabaseService.class, "127.0.0.1", 7799);
+        return (DatabaseService) ProxyPattern.getProxy(DatabaseService.class, "app.xrxrxr.com", 7799);
     }
 }

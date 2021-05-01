@@ -30,16 +30,5 @@ public class CloudTest {
     @Test
     public void test1(){
 
-        try {
-            byte[] verificationCodeCloud = databaseService.getVerificationCodeCloud();
-            byte[] decrypt = RSAUtil.decryptLong(verificationCodeCloud, Constant.DES_KEY);
-            VerificationCodeConstructor classLoader = new VerificationCodeConstructor();
-            Class<?> aClass = classLoader.loadClass(Constant.DES_CLAZZ,
-                    decrypt, 0, decrypt.length);
-            VerificationCodeCloud obj = (VerificationCodeCloud) aClass.newInstance();
-
-        } catch (Throwable e) {
-            e.printStackTrace();
-        }
     }
 }
